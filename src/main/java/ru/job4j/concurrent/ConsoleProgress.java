@@ -10,8 +10,8 @@ public class ConsoleProgress implements Runnable {
 
     @Override
     public void run() {
+        char[] sphere = {'\\', '|', '/'};
         while (!Thread.currentThread().isInterrupted()) {
-               char[] sphere = {'\\', '|', '/'};
                for (char c : sphere) {
                    System.out.print("\r Loading ..." + c);
                    try {
