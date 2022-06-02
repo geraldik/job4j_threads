@@ -6,29 +6,31 @@ import java.io.IOException;
 import java.net.URL;
 
 public class Wget implements Runnable {
-    private final String url;
-    private final int speed;
+    private final ArgsName jvm;
 
-    public Wget(String url, int speed) {
-        this.url = url;
-        this.speed = speed;
+    public Wget(String[] args) {
+        this.jvm = ArgsName.of(args);
     }
 
     @Override
     public void run() {
-        try (BufferedInputStream in = new BufferedInputStream(new URL(url).openStream());
-             FileOutputStream fileOutputStream = new FileOutputStream("pom_tmp.xml")) {
+        try (BufferedInputStream in = new BufferedInputStream(new URL(jvm.get("l")).openStream());
+             FileOutputStream fileOutputStream = new FileOutputStream(jvm.get("o"))) {
             byte[] dataBuffer = new byte[1024];
             int bytesRead;
-            long startTime = System.currentTimeMillis();
+            int downloadData = 0;
+            long startTimeMillis = System.currentTimeMillis();
             while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
-                long endTime = System.currentTimeMillis();
-                int delay = delay(startTime, endTime, bytesRead);
-                if (delay > 0) {
-                    Thread.sleep(delay);
+                downloadData += bytesRead;
+                if (downloadData == Integer.parseInt(jvm.get("s")) * 1048576) {
+                    long endTimeMillis = System.currentTimeMillis();
+                    if ((endTimeMillis - startTimeMillis) < 1000) {
+                        Thread.sleep(endTimeMillis - startTimeMillis);
+                    }
                 }
-                startTime = System.currentTimeMillis();
+                downloadData = 0;
+                startTimeMillis = System.currentTimeMillis();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -37,16 +39,27 @@ public class Wget implements Runnable {
         }
     }
 
-    private int delay(long startTime, long endTime, int bytesRead) {
-        int downloadTimeMillis = (int) (endTime - startTime);
-        int normalizeTimeMillis = (bytesRead * 1000 / speed);
-        return normalizeTimeMillis - downloadTimeMillis;
+    private void inputValidating() {
+        if (jvm.size() != 3) {
+            throw new IllegalArgumentException("Wrong amount of arguments. Use java -jar Wget.jar"
+                    + " -l=DOWNLOADING_LINK -o=OUTPUT_PATH -s=DOWNLOADING_SPEED");
+        }
+        if (jvm.get("l") == null
+                || jvm.get("o") == null
+                || jvm.get("s") == null) {
+            throw new IllegalArgumentException("Wrong set of keys. Use java -jar Wget.jar"
+                    + " -l=DOWNLOADING_LINK -o=OUTPUT_PATH -s=DOWNLOADING_SPEED");
+        }
+        try {
+            Integer.parseInt(jvm.get("s"));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Wrong format of speed argument."
+                    + " Speed argument must be is numeric.");
+        }
     }
 
     public static void main(String[] args) throws InterruptedException {
-        String url = args[0];
-        int speed = Integer.parseInt(args[1]);
-        Thread wget = new Thread(new Wget(url, speed));
+        Thread wget = new Thread(new Wget(args));
         wget.start();
         wget.join();
     }
