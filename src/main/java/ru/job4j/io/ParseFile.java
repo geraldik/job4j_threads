@@ -19,9 +19,8 @@ public final class ParseFile {
     public synchronized String getContent(Predicate<Character> filter) {
         StringBuilder output = new StringBuilder();
         try (InputStream i = new FileInputStream(file)) {
-            output.append("");
             int data;
-            while ((data = i.read()) > 0) {
+            while ((data = i.read()) != -1) {
                 if (filter.test((char) data)) {
                     output.append((char) data);
                 }
