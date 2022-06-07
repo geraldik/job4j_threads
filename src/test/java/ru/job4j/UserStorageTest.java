@@ -2,7 +2,6 @@ package ru.job4j;
 
 import org.junit.Test;
 
-import java.util.Objects;
 
 import static org.junit.Assert.*;
 
@@ -40,6 +39,21 @@ public class UserStorageTest {
         var expect2 = new User(2, 150);
         assertEquals(expect1, storage.getUser(1));
         assertEquals(expect2, storage.getUser(2));
+    }
+
+    @Test
+    public void whenTransferFromZeroAmountThenFalse() {
+        var storage = new UserStorage();
+        storage.add(new User(1, 0));
+        storage.add(new User(2, 100));
+        assertFalse(storage.transfer(1, 2, 50));
+    }
+    @Test
+    public void whenTransferWrongAmountThenFalse() {
+        var storage = new UserStorage();
+        storage.add(new User(1, 100));
+        storage.add(new User(2, 100));
+        assertFalse(storage.transfer(1, 2, 150));
     }
 
     @Test
