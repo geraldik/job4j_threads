@@ -7,6 +7,35 @@ import static org.junit.Assert.*;
 
 public class UserStorageTest {
 
+    private class ThreadStorage extends Thread {
+        private final UserStorage storage;
+
+        private ThreadStorage(UserStorage storage) {
+            this.storage = storage;
+        }
+        @Override
+        public void run() {
+            storage.add(new User(1, 100));
+            storage.add(new User(2, 100));
+            storage.transfer(1, 2, 50);
+        }
+    }
+
+    @Test
+    public void whenTransferThenTrue() throws InterruptedException {
+        final UserStorage storage = new UserStorage();
+        Thread first = new ThreadStorage(storage);
+        Thread second = new ThreadStorage(storage);
+        first.start();
+        second.start();
+        first.join();
+        second.join();
+        var expect1 = new User(1, 0);
+        var expect2 = new User(2, 200);
+        assertEquals(expect1, storage.getUser(1));
+        assertEquals(expect2, storage.getUser(2));
+    }
+
     @Test
     public void whenAddThanThenTrue() {
         var storage = new UserStorage();
@@ -30,24 +59,13 @@ public class UserStorageTest {
     }
 
     @Test
-    public void whenTransferThenTrue() {
-        var storage = new UserStorage();
-        storage.add(new User(1, 100));
-        storage.add(new User(2, 100));
-        storage.transfer(1, 2, 50);
-        var expect1 = new User(1, 50);
-        var expect2 = new User(2, 150);
-        assertEquals(expect1, storage.getUser(1));
-        assertEquals(expect2, storage.getUser(2));
-    }
-
-    @Test
     public void whenTransferFromZeroAmountThenFalse() {
         var storage = new UserStorage();
         storage.add(new User(1, 0));
         storage.add(new User(2, 100));
         assertFalse(storage.transfer(1, 2, 50));
     }
+
     @Test
     public void whenTransferWrongAmountThenFalse() {
         var storage = new UserStorage();
