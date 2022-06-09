@@ -11,10 +11,16 @@ public class SimpleBlockingQueue<T> {
 
     @GuardedBy("this")
     private final Queue<T> queue = new LinkedList<>();
+
+    private static final int DEFAULT_CAPACITY = 10;
     private final int capacity;
 
     public SimpleBlockingQueue(int capacity) {
         this.capacity = capacity;
+    }
+
+    public SimpleBlockingQueue() {
+        this.capacity = DEFAULT_CAPACITY;
     }
 
     public synchronized void offer(T value) throws InterruptedException {
@@ -32,5 +38,9 @@ public class SimpleBlockingQueue<T> {
         T t = queue.poll();
         notifyAll();
         return t;
+    }
+
+    public boolean isEmpty() {
+        return queue.isEmpty();
     }
 }
