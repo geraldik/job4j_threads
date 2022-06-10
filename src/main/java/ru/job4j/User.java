@@ -4,7 +4,6 @@ import net.jcip.annotations.ThreadSafe;
 
 import java.util.Objects;
 
-
 public class User {
 
     private final int id;
