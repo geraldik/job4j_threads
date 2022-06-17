@@ -24,17 +24,13 @@ public class ParallelIndexSearchTest {
 
     @Test
     public void whenThousandElementThanGetIndex() {
-        ParallelIndexSearch<Integer> parallelIndexSearch =
-                new ParallelIndexSearch<>(list, 0, 999, 900);
-        int index = parallelIndexSearch.search();
+        int index = ParallelIndexSearch.search(list, 0, 999, 900);
         assertThat(index, is(900));
     }
 
     @Test
     public void whenThousandElementThanGetMinusOne() {
-        ParallelIndexSearch<Integer> parallelIndexSearch =
-                new ParallelIndexSearch<>(list, 0, 999, 1000);
-        int index = parallelIndexSearch.search();
+        int index = ParallelIndexSearch.search(list, 0, 999, 1000);
         assertThat(index, is(-1));
     }
 

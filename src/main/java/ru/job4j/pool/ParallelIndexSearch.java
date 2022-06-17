@@ -40,7 +40,7 @@ public class ParallelIndexSearch<T> extends RecursiveTask<Integer> {
         return leftIndex == -1 ? rightIndex : leftIndex;
     }
 
-    public Integer search() {
+    public static <T> Integer search(List<T> list, int start, int end, T element) {
         ForkJoinPool forkJoinPool = new ForkJoinPool();
         return forkJoinPool.invoke(new ParallelIndexSearch<>(list, start, end, element));
     }
